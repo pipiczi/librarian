@@ -7,7 +7,7 @@ function AuthorController() {
 	this.buildAuthorRows = buildAuthorRows;
 	this.editAuthor = editAuthor;
 	this.createAuthor = createAuthor;
-	this.loadAuthors = loadAuthors;
+	this.reload = loadAuthors;
 	this.saveFunction;
 	
 	function buildAuthorRows(authors) {
@@ -32,7 +32,9 @@ function AuthorController() {
 	function editAuthor(id) {
 		viewObjects.dialogTitle.text('Edit author');
 		this.selectedAuthor = findAuthorById(id);
-		this.saveFunction = updateAuthor;
+		this.saveFunction = function() {
+			saveAuthor(this.selectedAuthor, true, this);
+		};
 		
 		viewObjects.lName.text(this.selectedAuthor.name);
 		viewObjects.lNationality.text(this.selectedAuthor.nationality);
@@ -50,7 +52,9 @@ function AuthorController() {
 				"name": "",
 				"nationality": ""
 		};
-		this.saveFunction = saveAuthor;
+		this.saveFunction = function() {
+			saveAuthor(this.selectedAuthor, false, this);
+		};
 		
 		viewObjects.lName.text('Name');
 		viewObjects.lNationality.text('Nationality');
@@ -69,90 +73,6 @@ function AuthorController() {
 			}
 		});
 		return foundAuthor;
-	}
-
-	function updateAuthor() {
-		var name = viewObjects.iName.val() ? viewObjects.iName.val() : this.selectedAuthor.name;
-		
-		var nationality = $('#tf-nationality > div > span').text() ? $('#tf-nationality > div > span').text() : this.selectedAuthor.nationality;
-		var year = viewObjects.iYear.val() ? viewObjects.iYear.val() : this.selectedAuthor.birthDate.substring(0,4);
-		var month = viewObjects.iMonth.val() ? formatNumber(viewObjects.iMonth.val()) : this.selectedAuthor.birthDate.substring(5,7);
-		var day = viewObjects.iDay.val() ? formatNumber(viewObjects.iDay.val()) : this.selectedAuthor.birthDate.substring(8);
-		
-		var editingAuthor = this.selectedAuthor;
-		var tempAuthor = {
-			"authorID": editingAuthor.authorID,
-			"birthDate": year + "-" + month + "-" + day,
-			"name": name,
-			"nationality": nationality
-		}
-		
-		$.ajax({
-		    url: '/librarian-web/author/update',
-		    type: 'POST',
-		    data: JSON.stringify(tempAuthor),
-		    contentType: 'application/json; charset=utf-8',
-		    dataType: 'json',
-		    async: true,
-		    complete: function(msg) {
-		        if(msg.readyState === 4) {
-		        	if(msg.status === 200) {
-			        	editingAuthor.name = tempAuthor.name;
-			        	editingAuthor.nationality = tempAuthor.nationality;
-			        	editingAuthor.birthDate = tempAuthor.birthDate;
-			        	
-			    		authorCtrl.loadAuthors();
-			    		
-			  		    viewObjects.readyToast.MaterialSnackbar.showSnackbar({message: tempAuthor.name + ' updated!'});
-		        	} else {
-		        		viewObjects.readyToast.MaterialSnackbar.showSnackbar({message: tempAuthor.name + ' update failed!'});
-		        	}
-		        }   
-		     }  
-		});
-		
-		viewObjects.closeDialog();
-	}
-	
-	function saveAuthor() {
-		var name = viewObjects.iName.val() ? viewObjects.iName.val() : this.selectedAuthor.name;
-		var nationality = $('#tf-nationality > div > span').text() ? $('#tf-nationality > div > span').text() : this.selectedAuthor.nationality;
-		var year = viewObjects.iYear.val() ? viewObjects.iYear.val() : this.selectedAuthor.birthDate.substring(0,4);
-		var month = viewObjects.iMonth.val() ? formatNumber(viewObjects.iMonth.val()) : this.selectedAuthor.birthDate.substring(5,7);
-		var day = viewObjects.iDay.val() ? formatNumber(viewObjects.iDay.val()) : this.selectedAuthor.birthDate.substring(8);
-		
-		var editingAuthor = this.selectedAuthor;
-		var tempAuthor = {
-			"birthDate": year + "-" + month + "-" + day,
-			"name": name,
-			"nationality": nationality
-		}
-		
-		$.ajax({
-		    url: '/librarian-web/author/insert',
-		    type: 'POST',
-		    data: JSON.stringify(tempAuthor),
-		    contentType: 'application/json; charset=utf-8',
-		    dataType: 'json',
-		    async: true,
-		    complete: function(msg) {
-		        if(msg.readyState === 4) {
-		        	if(msg.status === 200) {
-			        	editingAuthor.name = tempAuthor.name;
-			        	editingAuthor.nationality = tempAuthor.nationality;
-			        	editingAuthor.birthDate = tempAuthor.birthDate;
-			        	
-			    		authorCtrl.loadAuthors();
-			    		
-			  		    viewObjects.readyToast.MaterialSnackbar.showSnackbar({message: tempAuthor.name + ' created!'});
-		        	} else {
-		        		viewObjects.readyToast.MaterialSnackbar.showSnackbar({message: tempAuthor.name + ' creation failed!'});
-		        	}
-		        }   
-		     }  
-		});
-		
-		viewObjects.closeDialog();
 	}
 	
 	function loadAuthors() {
@@ -173,6 +93,6 @@ $(document).ready(function () {
 		viewObjects.saveBtn.click(function() {
 			authorCtrl.saveFunction();
 		});
-		authorCtrl.loadAuthors();
+		authorCtrl.reload();
 	});
 });
