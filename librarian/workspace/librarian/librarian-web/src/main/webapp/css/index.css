@@ -1,0 +1,51 @@
+.main-container {
+	padding: 20px;
+	background-color: #eee8e8;
+}
+
+.centered {
+	text-align: center;
+}
+
+.inline-table {
+	display: inline-block;
+	vertical-align: top;
+}
+
+.inline-table.horizontal-margin {
+	margin-left: 20px;
+	margin-right: 20px;
+}
+
+.selected-row {
+	background-color: #F5F5F5;
+}
+
+.inline {
+	display: inline;
+}
+
+
+.inline-block {
+	display: inline-block;
+}
+
+.float-right {
+	float: right;
+}
+
+.number-input-long {
+	width: 40%;
+}
+
+.number-input-short {
+	width: 24%;
+}
+
+.auto-width {
+	width:auto;
+}
+
+.is-focused > label.accent-color,.is-dirty > label.accent-color {
+	color: #795548 !important;
+}
